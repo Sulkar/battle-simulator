@@ -1,0 +1,13 @@
+
+.card img{
+    image-rendering: pixelated;
+}
+
+.imgUnitLeft {
+    -webkit-transform: scaleX(1);
+    transform: scaleX(1);
+}
+.imgUnitRight {
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+}
