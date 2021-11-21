@@ -5,16 +5,22 @@ import anime from "animejs";
 
 export class Battle {
 
-    constructor(app) {
+    constructor(app, unit1, unit2) {
         this.message = "Hello World from MyClass";
         this.container = app;
         this.battleStarted = false;
         this.battleDistance = 0;
-        this.currentUnit;
+        this.battleDirection;
         this.leftCard;
         this.rightCard;
 
-        this.hitSound = new Audio("./sounds/attack.mp3");
+        this.unit1 = unit1;
+        this.unit2 = unit2;
+
+        this.attacker;
+        this.defender;
+
+        
         this.setBattleDistance();
     }
 
@@ -34,16 +40,18 @@ export class Battle {
     setBattleStarted(boolean) {
         this.battleStarted = boolean;
     }
-    changeCurrentUnit() {
-        if (this.currentUnit != undefined) {
-            this.currentUnit.style.zIndex = "1";
+    changeAttacker() {
+        if (this.attacker != undefined) {
+            this.attacker.getCard().style.zIndex = "1";
         }
-        if (this.currentUnit == this.leftCard) {
-            this.currentUnit = this.rightCard;
+        if (this.attacker == this.unit1) {
+            this.defender = this.unit1;
+            this.attacker = this.unit2;
         } else {
-            this.currentUnit = this.leftCard;
+            this.defender = this.unit2;
+            this.attacker = this.unit1;
         }
-        this.currentUnit.style.zIndex = "100";
+        this.attacker.getCard().style.zIndex = "100";
     }
     createArena() {
         const arenaRow = document.createElement("div");
@@ -58,55 +66,19 @@ export class Battle {
         arenaRow.append(arenaRight);
 
         //create Cards
-        this.leftCard = this.createCard("left");
+
+        this.leftCard = this.unit1.createCard("left");
         arenaLeft.append(this.leftCard);
-        this.rightCard = this.createCard("right");
+        this.rightCard = this.unit2.createCard("right");
         arenaRight.append(this.rightCard);
 
-        this.changeCurrentUnit();
+        this.changeAttacker();
 
         this.container.append(arenaRow);
         this.createBattleStartButton();
     }
 
-    createCard(orientation) {
 
-        const card = document.createElement("div");
-        card.classList.add("card", "mx-auto", "card-" + orientation);
-        card.style.width = "18rem";
-
-        const cardBody = document.createElement("div");
-        cardBody.classList.add("card-body");
-        const cardTitle = document.createElement("h5");
-        cardTitle.classList.add("card-title");
-
-        card.append(this.createUnitImage(orientation));
-        card.append(cardBody);
-        cardBody.append(cardTitle);
-        card.orientation = orientation;
-
-        if (orientation == "left") {
-            cardTitle.textContent = "Hero";
-        }else{
-            cardTitle.textContent = "Monster";
-        }
-        return card;
-
-    }
-
-    createUnitImage(orientation) {
-        const unitImage = document.createElement("img");
-        console.log(orientation)
-        if (orientation == "left") {
-            unitImage.classList.add("card-img-top", "imgUnitLeft");
-            unitImage.src = "./images/unit1.png";
-        } else {
-            unitImage.classList.add("card-img-top", "imgUnitRight");
-            unitImage.src = "./images/monster1.png";
-        }
-        
-        return unitImage;
-    }
 
     createBattleStartButton() {
         const buttonRow = document.createElement("div");
@@ -133,45 +105,12 @@ export class Battle {
     }
 
     async startBattle() {
-        let battleDirection;
-        if (this.currentUnit.orientation == "left") {
-            battleDirection = 1;
+        if (this.attacker.orientation == "left") {
+            this.battleDirection = 1;
         } else {
-            battleDirection = -1;
+            this.battleDirection = -1;
         }
-
-
-        // battle animation
-        anime({
-            targets: this.currentUnit,
-            //translateX: this.distance,
-            keyframes: [
-                { translateY: -40 },
-                { translateX: this.getBattleDistance() * battleDirection },
-                //{translateY: 40},
-                { translateX: 0 },
-                { translateY: 0 }
-            ],
-            //rotate: '1turn',
-            //backgroundColor: '#FFF',
-            duration: 1000,
-            easing: 'easeOutElastic(1, .8)',
-            //direction: 'alternate'
-            complete: function (anim) {
-                this.changeCurrentUnit();
-                this.setBattleStarted(false);
-            }.bind(this)
-        });
-        //
-        await this.sleep(400);
-        this.hitSound.play();
-
-        /*for (let index = 0; index < 5; index++) {
-            console.log(index);
-            await this.sleep(1000); // Pausiert die Funktion für 3 Sekunden
-        }*/
-
-        
+        this.attacker.attack(this);
     }
 
     sleep(milliseconds) {
