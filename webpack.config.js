@@ -10,6 +10,7 @@ module.exports = {
               { from: 'src/index.html', to: '' },
               { from: 'src/images', to: 'images' },
               { from: 'src/sounds', to: 'sounds' },
+              { from: 'src/data', to: 'data' },
           ],
       }),
   ],

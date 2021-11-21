@@ -1,13 +1,13 @@
 
 import "./style/battle.scss";
-import anime from "animejs";
 
 
 export class Battle {
 
-    constructor(app, unit1, unit2) {
+    constructor(game, unit1, unit2) {
         this.message = "Hello World from MyClass";
-        this.container = app;
+        this.game = game;
+        this.container = this.game.container;
         this.battleStarted = false;
         this.battleDistance = 0;
         this.battleDirection;
@@ -15,13 +15,17 @@ export class Battle {
         this.rightCard;
 
         this.unit1 = unit1;
+        this.unit1.setBattle(this);
         this.unit2 = unit2;
+        this.unit2.setBattle(this);
 
         this.attacker;
         this.defender;
+        this.looser;
+        this.winner;
 
-        
         this.setBattleDistance();
+        this.createArena();
     }
 
     setBattleDistance() {
@@ -78,8 +82,6 @@ export class Battle {
         this.createBattleStartButton();
     }
 
-
-
     createBattleStartButton() {
         const buttonRow = document.createElement("div");
         buttonRow.classList.add("row");
@@ -93,8 +95,7 @@ export class Battle {
             if (!this.hasBattleStarted()) {
                 this.setBattleStarted(true);
                 this.startBattle();
-            } else {
-                console.log("battle started");
+                button.style.display = "none";
             }
         }.bind(this));
 
@@ -105,12 +106,39 @@ export class Battle {
     }
 
     async startBattle() {
-        if (this.attacker.orientation == "left") {
-            this.battleDirection = 1;
-        } else {
-            this.battleDirection = -1;
+
+        for (let index = 0; index < 1; index++) {
+
+
+            if (this.attacker.orientation == "left") {
+                this.battleDirection = 1;
+            } else {
+                this.battleDirection = -1;
+            }
+            await this.attacker.attack();
+
         }
-        this.attacker.attack(this);
+    }
+
+    setLooser(unit) {
+        if (unit == this.unit1) {
+            this.looser = this.unit1;
+            this.winner = this.unit2;
+        }
+        else {
+            this.looser = this.unit2;
+            this.winner = this.unit1;
+        }
+        this.createBattleEnd();
+    }
+    createBattleEnd() {
+        this.looser.cardTitle.textContent = this.looser.name + " hat verloren!";
+        this.looser.cardTitle.classList.add("bg-danger", "text-white");
+
+        this.winner.cardTitle.textContent = this.winner.name + " hat gewonnen!";
+        this.winner.cardTitle.classList.add("bg-success", "text-white");
+
+        this.game.createNextBattleButton();
     }
 
     sleep(milliseconds) {
